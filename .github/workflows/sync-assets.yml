@@ -1,0 +1,26 @@
+name: Complete source upload
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/sync-assets.yml"
+permissions:
+  contents: write
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --package-lock-only --ignore-scripts
+      - run: curl --fail --location --retry 5 https://tedxghrcemn-2026.karan865490.chatgpt.site/og.png --output public/og.png
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json public/og.png
+          git commit -m "Add lockfile and social preview asset"
+          git push
